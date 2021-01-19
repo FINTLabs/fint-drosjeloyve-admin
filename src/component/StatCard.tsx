@@ -3,7 +3,7 @@ import {Stat, StatLabel, StatNumber} from "@chakra-ui/react";
 
 const StatCard = (props: { filterStatus: string | null, onClick: () => void, statNumber: number, statLabel: string }) => {
     console.log("filterStatus", props.filterStatus)
-    return <Stat
+    return <Stat id={props.statLabel}
         border="1px"
         borderColor={props.filterStatus === props.statLabel ? "gray.500" : "gray.200"}
         bg={props.filterStatus === props.statLabel ? "gray.100" : "white"}
