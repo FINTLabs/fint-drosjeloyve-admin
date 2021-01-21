@@ -23,3 +23,17 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+
+Cypress.Commands.add("apiCall", () => {
+        cy.intercept('GET', '/api/organisations', {'fixture': 'organisations.json'});
+        cy.intercept('GET', '/api/status', {'fixture': 'statuses.json'});
+        cy.intercept('GET', '/api/applications', {'fixture': 'applications.json'});
+        cy.visit('/');
+    }
+);
+
+Cypress.Commands.add("searchFor", (searchValue) => {
+    cy.get("input")
+        .type(searchValue);
+});

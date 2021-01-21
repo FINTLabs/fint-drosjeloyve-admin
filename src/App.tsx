@@ -69,15 +69,14 @@ function App() {
 
     const getStatsByStatus = (status: string): number => {
         return applications.filter(application => application.status === status).length;
-    }
+    };
 
-    console.log("organisations", organisations);
     return (
         <Box>
             <Header/>
             {isLoading && <Progress size="xs" isIndeterminate/>}
             <Box p={8}>
-                <SimpleGrid columns={4} spacing={2} pb={2}>
+                <SimpleGrid columns={4} spacing={2} pb={2} id={"status"}>
                     <StatCard filterStatus={filterStatus}
                               onClick={() => setFilterStatus(null)}
                               statNumber={applications.length}
@@ -89,7 +88,6 @@ function App() {
                                   statNumber={getStatsByStatus(s)}
                                   statLabel={s}
                         />
-
                     ))}
                 </SimpleGrid>
 
@@ -98,7 +96,7 @@ function App() {
                     <InputLeftElement children={<SearchIcon color="gray.500"/>}/>
                 </InputGroup>
                 <OrganisationFilter
-                    setFilterOrganisation={setFilterOrganisation}
+                    setFilterOrganisation={(e) => setFilterOrganisation(e)}
                     filterOrganisation={filterOrganisation}
                     organisations={organisations}
                     applications={applications}
