@@ -26,8 +26,6 @@ describe('Showing 1 application after click on status "NEW"', () => {
     })
 });
 
-
-
 describe('Showing 2 application after click on status "PURGE"', () => {
     it('Shows 2 application on filter value PURGE', () => {
         cy.apiCall();
