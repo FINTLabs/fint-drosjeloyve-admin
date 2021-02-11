@@ -1,4 +1,8 @@
-FROM node:10-alpine as build
-COPY . /src
+FROM cypress/base:10 as TEST
 WORKDIR /src
-RUN yarn && yarn build
+COPY package.json .
+COPY . /src
+COPY cypress.json cypress ./
+COPY cypress ./cypress
+RUN yarn install --frozen-lockfile
+RUN yarn ci && yarn build
