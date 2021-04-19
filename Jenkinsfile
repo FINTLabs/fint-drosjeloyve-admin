@@ -9,7 +9,7 @@ pipeline {
             }
         }
         stage('Publish') {
-            when { branch 'master' }
+            when { branch 'main' }
             steps {
                 withDockerRegistry([credentialsId: 'fintlabsacr.azurecr.io', url: 'https://fintlabsacr.azurecr.io']) {
                     sh "docker tag ${GIT_COMMIT} fintlabsacr.azurecr.io/drosjeloyve-frontend:latest"
@@ -18,9 +18,9 @@ pipeline {
             }
         }
         stage('Build backend') {
-            when { branch 'master' }
+            when { branch 'main' }
             steps {
-                 build 'FINTLabs/fint-drosjeloyve-service/master'
+                 build 'FINTLabs/fint-drosjeloyve-service/main'
             }
         }
     }
