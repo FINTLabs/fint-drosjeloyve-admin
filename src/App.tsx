@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+    Steps,
     Box,
     chakra,
     Input,
@@ -8,14 +9,15 @@ import {
     Progress,
     SimpleGrid,
     Tag,
-    Text
+    Text,
+    Icon,
 } from '@chakra-ui/react';
 import {Application} from "./model/Application";
 import axios from 'axios';
-import {SearchIcon} from "@chakra-ui/icons";
 import Header from "./component/Header";
 import StatCard from "./component/StatCard";
 import OrganisationFilter from "./component/OrganisationFilter";
+import { LuSearch } from 'react-icons/lu';
 
 
 const Table = chakra('table');
@@ -74,9 +76,13 @@ function App() {
     return (
         <Box>
             <Header/>
-            {isLoading && <Progress size="xs" isIndeterminate/>}
+            {isLoading && <Progress.Root size="xs" indeterminate>
+                <Progress.Track>
+                    <Progress.Range />
+                </Progress.Track>
+            </Progress.Root>}
             <Box p={8}>
-                <SimpleGrid columns={4} spacing={2} pb={2} id={"status"}>
+                <SimpleGrid columns={4} gap={2} pb={2} id={"status"}>
                     <StatCard filterStatus={filterStatus}
                               onClick={() => setFilterStatus(null)}
                               statNumber={applications.length}
@@ -92,8 +98,8 @@ function App() {
                 </SimpleGrid>
 
                 <InputGroup>
-                    <Input placeholder="Søk" onChange={(e) => setFilter(e.target.value)}/>
-                    <InputLeftElement children={<SearchIcon color="gray.500"/>}/>
+                    <Input placeholder="Søk" onValueChange={(e) => setFilter(e.target.value)}/>
+                    <InputLeftElement children={<Icon color="gray.500" asChild><LuSearch /></Icon>}/>
                 </InputGroup>
                 <OrganisationFilter
                     setFilterOrganisation={(e) => setFilterOrganisation(e)}
@@ -102,7 +108,7 @@ function App() {
                     applications={applications}
                 />
                 <Box p={2}>
-                    <Table w="100%">
+                    <Table.Root w="100%">
                         <thead>
                         <TableRow>
                             <TableHeader align="left">Fylke</TableHeader>
@@ -132,8 +138,8 @@ function App() {
                                         fontSize="sm">{application.archiveReference}</Text></TableCell>
                                     <TableCell><Text
                                         fontSize="sm">{application.subjectName}</Text></TableCell>
-                                    <TableCell><Tag variant="solid" colorScheme="green"
-                                                    size="sm">{application.status}</Tag></TableCell>
+                                    <TableCell><Tag.Root variant="solid" colorPalette="green"
+                                                    size="sm">{application.status}</Tag.Root></TableCell>
                                     <TableCell><Text
                                         fontSize="sm">{application.caseId}</Text></TableCell>
                                     <TableCell>
@@ -147,7 +153,7 @@ function App() {
                                 </TableRow>
                             ))}
                         </tbody>
-                    </Table>
+                    </Table.Root>
                 </Box>
             </Box>
         </Box>

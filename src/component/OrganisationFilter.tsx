@@ -1,5 +1,5 @@
 import React from 'react';
-import {Box, Wrap, WrapItem} from "@chakra-ui/react";
+import { Steps, Box, Wrap, WrapItem } from "@chakra-ui/react";
 import OrganisationTag from "./OrganisationTag";
 import {Application} from "../model/Application";
 

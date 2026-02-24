@@ -1,5 +1,5 @@
 import React from 'react';
-import {Flex, Image, Text} from "@chakra-ui/react";
+import { Steps, Flex, Image, Text } from "@chakra-ui/react";
 import logo from "../image/vigofint.png";
 
 const Header = () => {
