@@ -1,5 +1,5 @@
 import React from 'react';
-import { Steps, Tag } from "@chakra-ui/react";
+import { Tag } from "@chakra-ui/react";
 
 const OrganisationTag = (props: {
     organisationNumber: string,
@@ -12,7 +12,7 @@ const OrganisationTag = (props: {
         <Tag.Root
             id={props.organisationNumber}
             variant="solid"
-            colorPalette={props.filterOrganisation === props.organisationNumber ? "gray" : "green"}
+            colorPalette={props.filterOrganisation === props.organisationNumber ? "gray" : "purple"}
             size="md"
             onClick={props.onClick}
             cursor="pointer"
