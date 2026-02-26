@@ -1,157 +1,210 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from "react"
 import {
     Box,
     chakra,
     Input,
     InputGroup,
-    InputLeftElement,
     Progress,
     SimpleGrid,
     Tag,
-    Text
-} from '@chakra-ui/react';
-import {Application} from "./model/Application";
-import axios from 'axios';
-import {SearchIcon} from "@chakra-ui/icons";
-import Header from "./component/Header";
-import StatCard from "./component/StatCard";
-import OrganisationFilter from "./component/OrganisationFilter";
+    Text,
+    Icon,
+} from "@chakra-ui/react"
+import { Application } from "./model/Application"
+import axios from "axios"
+import Header from "./component/Header"
+import StatCard from "./component/StatCard"
+import OrganisationFilter from "./component/OrganisationFilter"
+import { LuSearch } from "react-icons/lu"
 
+const StyledTable = chakra("table", {
+    base: { width: "100%", borderCollapse: "collapse" },
+})
 
-const Table = chakra('table');
-const TableRow = chakra('tr', {
-    baseStyle: {
-        _even: {bg: "gray.100"}
-    }
-});
-const TableCell = chakra('td', {
-    baseStyle: {
-        padding: '8px',
-    },
-});
-const TableHeader = chakra('th', {
-    baseStyle: {
-        padding: '8px',
-    },
-});
+const TableRow = chakra("tr", {
+    base: { _even: { bg: "gray.50" } },
+})
 
+const TableCell = chakra("td", {
+    base: { padding: "8px" },
+})
+
+const TableHeader = chakra("th", {
+    base: { padding: "8px", textAlign: "left" },
+})
 
 function App() {
-
-    const [applications, setApplicaiton] = useState<Application[]>([]);
-    const [status, setStatus] = useState<string[]>([]);
-    const [organisations, setOrganisations] = useState<any>({});
-    const [isLoading, setIsLoading] = useState<boolean>(false);
-    const [filter, setFilter] = useState<string>('');
-    const [filterStatus, setFilterStatus] = useState<string | null>(null);
-    const [filterOrganisation, setFilterOrganisation] = useState<string>('ALL');
+    const [applications, setApplications] = useState<Application[]>([])
+    const [status, setStatus] = useState<string[]>([])
+    const [organisations, setOrganisations] = useState<any>({})
+    const [isLoading, setIsLoading] = useState(false)
+    const [filter, setFilter] = useState("")
+    const [filterStatus, setFilterStatus] = useState<string | null>(null)
+    const [filterOrganisation, setFilterOrganisation] = useState("ALL")
 
     useEffect(() => {
-        setIsLoading(true);
-        axios.get('/api/organisations').then(result => {
-            if (result.status === 200) {
-                setOrganisations(Object.assign(result.data, {"ALL": "Alle"}));
+        const fetchData = async () => {
+            try {
+                setIsLoading(true)
+
+                const [orgRes, statusRes, appRes] = await Promise.all([
+                    axios.get("/api/organisations"),
+                    axios.get("/api/status"),
+                    axios.get("/api/applications"),
+                ])
+
+                setOrganisations({ ...orgRes.data, ALL: "Alle" })
+                setStatus(statusRes.data)
+                setApplications(appRes.data)
+            } finally {
+                setIsLoading(false)
             }
-            axios.get('/api/status').then(result => {
-                if (result.status === 200) {
-                    setStatus(result.data);
-                }
-                axios.get('/api/applications').then(result => {
-                    if (result.status === 200) {
-                        setApplicaiton(result.data);
-                    }
-                    setIsLoading(false);
-                });
-            });
-        })
+        }
 
-    }, []);
+        fetchData()
+    }, [])
 
-    const getStatsByStatus = (status: string): number => {
-        return applications.filter(application => application.status === status).length;
-    };
+    const getStatsByStatus = (s: string): number =>
+        applications.filter((a) => a.status === s).length
+
+    const filteredApplications = applications
+        .filter((application) =>
+            filter.match(/AR[0-9].*/i)
+                ? application.archiveReference
+                    .toLowerCase()
+                    .startsWith(filter.toLowerCase())
+                : application.subjectName
+                    .toLowerCase()
+                    .includes(filter.toLowerCase())
+        )
+        .filter((application) =>
+            filterOrganisation === "ALL"
+                ? true
+                : application.requestor === filterOrganisation
+        )
+        .filter((application) =>
+            filterStatus ? application.status === filterStatus : true
+        )
 
     return (
         <Box>
-            <Header/>
-            {isLoading && <Progress size="xs" isIndeterminate/>}
+            <Header />
+
+            {isLoading && (
+                <Progress.Root size="xs">
+                    <Progress.Track />
+                </Progress.Root>
+            )}
+
             <Box p={8}>
-                <SimpleGrid columns={4} spacing={2} pb={2} id={"status"}>
-                    <StatCard filterStatus={filterStatus}
-                              onClick={() => setFilterStatus(null)}
-                              statNumber={applications.length}
-                              statLabel="total"
+                <SimpleGrid columns={4} gap={2} pb={4}>
+                    <StatCard
+                        filterStatus={filterStatus}
+                        onClick={() => setFilterStatus(null)}
+                        statNumber={applications.length}
+                        statLabel="Total"
                     />
-                    {status && status.map(s => (
-                        <StatCard key={s} filterStatus={filterStatus}
-                                  onClick={() => setFilterStatus(s)}
-                                  statNumber={getStatsByStatus(s)}
-                                  statLabel={s}
+
+                    {status.map((s) => (
+                        <StatCard
+                            key={s}
+                            filterStatus={filterStatus}
+                            onClick={() => setFilterStatus(s)}
+                            statNumber={getStatsByStatus(s)}
+                            statLabel={s}
                         />
                     ))}
                 </SimpleGrid>
 
-                <InputGroup>
-                    <Input placeholder="Søk" onChange={(e) => setFilter(e.target.value)}/>
-                    <InputLeftElement children={<SearchIcon color="gray.500"/>}/>
+                <InputGroup
+                    mb={4}
+                    startElement={
+                        <Icon color="gray.500">
+                            <LuSearch />
+                        </Icon>
+                    }
+                >
+                    <Input
+                        placeholder="Søk"
+                        value={filter}
+                        onChange={(e) => setFilter(e.currentTarget.value)}
+                    />
                 </InputGroup>
+
                 <OrganisationFilter
-                    setFilterOrganisation={(e) => setFilterOrganisation(e)}
+                    setFilterOrganisation={setFilterOrganisation}
                     filterOrganisation={filterOrganisation}
                     organisations={organisations}
                     applications={applications}
                 />
-                <Box p={2}>
-                    <Table w="100%">
+
+                <Box mt={4}>
+                    <StyledTable>
                         <thead>
                         <TableRow>
-                            <TableHeader align="left">Fylke</TableHeader>
-                            <TableHeader align="left">Altinn referanse</TableHeader>
-                            <TableHeader align="left">Søker</TableHeader>
-                            <TableHeader align="left">Status</TableHeader>
-                            <TableHeader align="left">Saksnummer</TableHeader>
-                            <TableHeader align="left">Opprettet</TableHeader>
-                            <TableHeader align="left">Oppdatert</TableHeader>
+                            <TableHeader>Fylke</TableHeader>
+                            <TableHeader>Altinn referanse</TableHeader>
+                            <TableHeader>Søker</TableHeader>
+                            <TableHeader>Status</TableHeader>
+                            <TableHeader>Saksnummer</TableHeader>
+                            <TableHeader>Opprettet</TableHeader>
+                            <TableHeader>Oppdatert</TableHeader>
                         </TableRow>
                         </thead>
                         <tbody>
-                        {applications && applications
-                            .filter((application) =>
-                                filter.match(/AR[0-9].*/i)
-                                    ? application.archiveReference.toLowerCase().startsWith(filter.toLowerCase())
-                                    : application.subjectName.toLowerCase().includes(filter.toLowerCase())
-                            )
-                            .filter(application => filterOrganisation === 'ALL' ? true : application.requestor === filterOrganisation)
-                            .filter((application) => filterStatus ? application.status === filterStatus : true)
-                            .map(application => (
-                                <TableRow key={application.archiveReference}>
+                        {filteredApplications.map((application) => (
+                            <TableRow key={application.archiveReference}>
+                                <TableCell>
+                                    <Text fontSize="sm">
+                                        {application.requestorName}
+                                    </Text>
+                                </TableCell>
 
-                                    <TableCell><Text
-                                        fontSize="sm">{application.requestorName}</Text></TableCell>
-                                    <TableCell><Text
-                                        fontSize="sm">{application.archiveReference}</Text></TableCell>
-                                    <TableCell><Text
-                                        fontSize="sm">{application.subjectName}</Text></TableCell>
-                                    <TableCell><Tag variant="solid" colorScheme="green"
-                                                    size="sm">{application.status}</Tag></TableCell>
-                                    <TableCell><Text
-                                        fontSize="sm">{application.caseId}</Text></TableCell>
-                                    <TableCell>
-                                        <Text
-                                            fontSize="sm">{new Date(application.archivedDate).toLocaleString()}</Text>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Text
-                                            fontSize="sm">{new Date(application.updatedDate).toLocaleString()}</Text>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
+                                <TableCell>
+                                    <Text fontSize="sm">
+                                        {application.archiveReference}
+                                    </Text>
+                                </TableCell>
+
+                                <TableCell>
+                                    <Text fontSize="sm">
+                                        {application.subjectName}
+                                    </Text>
+                                </TableCell>
+
+                                <TableCell>
+                                    <Tag.Root
+                                        variant="solid"
+                                        colorPalette="orange"
+                                        size="sm"
+                                    >
+                                        <Tag.Label>{application.status}</Tag.Label>
+                                    </Tag.Root>
+                                </TableCell>
+
+                                <TableCell>
+                                    <Text fontSize="sm">{application.caseId}</Text>
+                                </TableCell>
+
+                                <TableCell>
+                                    <Text fontSize="sm">
+                                        {new Date(application.archivedDate).toLocaleString()}
+                                    </Text>
+                                </TableCell>
+
+                                <TableCell>
+                                    <Text fontSize="sm">
+                                        {new Date(application.updatedDate).toLocaleString()}
+                                    </Text>
+                                </TableCell>
+                            </TableRow>
+                        ))}
                         </tbody>
-                    </Table>
+                    </StyledTable>
                 </Box>
             </Box>
         </Box>
-    );
+    )
 }
 
-export default App;
+export default App
